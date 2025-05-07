@@ -1,0 +1,13 @@
+# Default values for librechat.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+environment: dev
+
+autoscaling:
+  enabled: false
+  maxReplicas: 2
+
+mongodb:
+  persistence:
+    size: 8Gi

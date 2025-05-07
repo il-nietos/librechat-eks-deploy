@@ -1,0 +1,112 @@
+# Base values file for all environments
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/danny-avila/librechat
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+networkPolicies:
+  enabled: true
+
+service:
+  type: LoadBalancer
+  port: 3080
+  targetPort: http
+
+# podAnnotations: {}
+# podLabels: {}
+# imagePullSecrets: []
+# nameOverride: ""
+# fullnameOverride: ""
+# podSecurityContext: {}
+#   # fsGroup: 2000
+#   # runAsUser: 2000
+# securityContext: {}
+# nodeSelector: {}
+# tolerations: []
+# affinity: {}
+
+# Values injected via CI / CD
+secrets:
+  CREDS_KEY: ""
+  CREDS_IV: ""
+  JWT_SECRET: ""
+  JWT_REFRESH_SECRET: ""
+  MEILI_MASTER_KEY: ""
+
+
+config:
+  envSecrets:
+    secretRef: librechat
+  env:
+    ALLOW_EMAIL_LOGIN: "true"
+    ALLOW_REGISTRATION: "true"
+    ALLOW_SOCIAL_LOGIN: "false"
+    ALLOW_SOCIAL_REGISTRATION: "false"
+    APP_TITLE: "Librechat"
+    OPENROUTER_KEY: "" 
+    CUSTOM_FOOTER: "CustomLibreChat by LibreChat-Group at Datascientest"
+    DEBUG_CONSOLE: "true"
+    DEBUG_LOGGING: "true"
+    DEBUG_OPENAI: "true"
+    DEBUG_PLUGINS: "true"
+    ENDPOINTS: "openAI,chatGPTBrowser,google,gptPlugins"
+    SEARCH: false
+    OPENAI_MODELS: "gpt-4"
+
+mongodb:
+  enabled: true
+  auth:
+    enabled: false
+  image:
+    repository: mongo
+    tag: "6.0"
+    pullPolicy: Always
+  databases:
+    - LibreChat
+  persistence:
+    enabled: true
+    storageClass: "gp2"
+    size: 8Gi
+  securityContext:
+    enabled: true
+    fsGroup: 999
+    runAsUser: 999
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 999
+  service:
+    ports:
+      mongodb: 27017
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 3080
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 3080
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 6
