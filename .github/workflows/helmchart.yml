@@ -1,0 +1,62 @@
+name: Package and Push Helmchart
+
+
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  package-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Login to registry
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            echo "env=prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "env=dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create secrets values file
+        run: |
+          cat <<EOF > librechat-chart/values.secrets.yaml
+          secrets:
+            CREDS_KEY: "${{ secrets.CREDS_KEY }}"
+            CREDS_IV: "${{ secrets.CREDS_IV }}"
+            JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+            JWT_REFRESH_SECRET: "${{ secrets.JWT_REFRESH_SECRET }}"
+            MEILI_MASTER_KEY: "${{ secrets.MEILI_MASTER_KEY }}"
+          config:
+            env: 
+              OPENROUTER_KEY: "${{ secrets.OPENROUTER_KEY }}"
+          EOF
+      
+      - name: helm package
+        run: |
+          helm dependency build librechat-chart
+          helm package librechat-chart --destination .
+ 
+
+      - name: helm push
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          CHART_FILE=$(ls *.tgz | head -n 1)
+          helm push "$CHART_FILE" oci://ghcr.io/${{ github.repository_owner }}/charts
