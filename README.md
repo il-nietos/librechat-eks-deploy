@@ -35,10 +35,10 @@ The Helm chart deploys:
 
 Each environment (`dev`, `stage`, `prod`) is configured through its corresponding `values-{env}.yaml` file. The differences are:
 
-| Parameter         | `dev`        | `stage`      | `prod`       |
-|------------------|--------------|--------------|--------------|
-| MongoDB storage  | `8Gi`        | `20Gi`       | `50Gi`       |
-| maxReplicas      | `2`          | `3`          | `5`          |
+| Parameter       | `dev` | `stage` | `prod` |
+| --------------- | ----- | ------- | ------ |
+| MongoDB storage | `8Gi` | `20Gi`  | `50Gi` |
+| maxReplicas     | `2`   | `3`     | `5`    |
 
 ---
 
