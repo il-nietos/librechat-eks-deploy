@@ -35,20 +35,6 @@ jobs:
             echo "env=dev" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create secrets values file
-        run: |
-          cat <<EOF > librechat-chart/values.secrets.yaml
-          secrets:
-            CREDS_KEY: "${{ secrets.CREDS_KEY }}"
-            CREDS_IV: "${{ secrets.CREDS_IV }}"
-            JWT_SECRET: "${{ secrets.JWT_SECRET }}"
-            JWT_REFRESH_SECRET: "${{ secrets.JWT_REFRESH_SECRET }}"
-            MEILI_MASTER_KEY: "${{ secrets.MEILI_MASTER_KEY }}"
-          config:
-            env: 
-              OPENROUTER_KEY: "${{ secrets.OPENROUTER_KEY }}"
-          EOF
-          
       - name: Add Bitnami repo
         run: helm repo add bitnami https://charts.bitnami.com/bitnami
   
